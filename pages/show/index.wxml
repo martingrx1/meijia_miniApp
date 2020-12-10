@@ -1,0 +1,8 @@
+<!--miniprogram/pages/show/index.wxml-->
+
+<view class="show-container" bindtap="preiviewImage">
+  <view class="show-item" wx:for="{{products}}" style="order:{{item.order || 1}}">
+    <image mode="widthFix" src="{{item.imgUrl}}" data-imgUrl="{{item.imgUrl}}" class="item-image" ></image>
+    <view class="item-intro">{{item.introText}} </view>
+  </view>
+</view>

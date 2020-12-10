@@ -1,0 +1,34 @@
+<!--miniprogram/pages/home/admin/index.wxml-->
+
+<view class="page">
+  <button bindtap="selectWeek">选择日期</button>
+  <view class="card" wx:for="{{subInfo}}">
+    <view class="card-header">
+      <view class="header-left">
+        <view class="userInfo">
+          <view class="avatar">
+            <image mode="scaleToFill"
+              src="{{item.userInfo.avatarUrl}}"></image>
+          </view>
+          <view class="nickName">{{item.userInfo.nickName}}</view>
+        </view>
+      </view>
+      <view class="header-right">
+        <view class="date">2020年11月23日 {{item.clock}}</view>
+      </view>
+    </view>
+    <view class="card-content">
+      <view class="title">人间富贵花 奇异zxxzxzxz</view>
+      <view class="content">
+        <view class="image-area">
+          <image wx:for="{{3}}" mode="scaleToFill" class="prod-img"
+            src="https://thirdqq.qlogo.cn/qqapp/1110319052/608B197374AEAE4268ED7EE534BDDE50/100">
+          </image>
+        </view>
+        <view class="price"> 45元</view>
+      </view>
+
+    </view>
+    <view class="card-footer"></view>
+  </view>
+</view>

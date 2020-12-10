@@ -1,0 +1,25 @@
+/* miniprogram/pages/show/index.wxss */
+.show-container{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 10px;
+}
+.show-item{
+  flex-basis: 100%;
+  width: 100px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  background-color: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.item-image{
+  width: 100%;
+}
+.item-intro{
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 14px;
+}
