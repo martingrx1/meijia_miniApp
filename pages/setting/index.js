@@ -24,7 +24,7 @@ Page({
     })
   },
 
-  introInput({
+  orderInput({
     detail
   }) {
     this.setData({

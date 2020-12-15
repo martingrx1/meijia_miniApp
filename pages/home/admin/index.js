@@ -48,6 +48,7 @@ Page({
             nickName:c.nickName
           }
           subInfo.clock = c.subInfo.clock;
+          subInfo.date = c.subInfo.date
           return subInfo
         })
     }).flat(Infinity)

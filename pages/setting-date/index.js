@@ -2,7 +2,8 @@
 import {
   parseDateToTimestamp,
   parseTimestampToDate,
-  isMonday
+  isMonday,
+  findNearMonday
 } from '../../utils/date'
 import {
   whereQuery,
@@ -43,7 +44,7 @@ Page({
     lazyDog: false, //懒狗模式
     weekPlan: [],
     timeQuantum: [],
-    settingMode:'add',
+    settingMode: 'add',
   },
   strategies() {
     return {
@@ -52,7 +53,7 @@ Page({
     }
   },
 
-  getDayTemplate() { 
+  getDayTemplate() {
     return {
       capacity: 2,
       contentText: "可预约",
@@ -157,40 +158,40 @@ Page({
     })
   },
 
-   doSubmit() {
+  doSubmit() {
     this.setWeekPlan();
     this.setDayDateInfo()
-    if(this.data.settingMode === 'add'){
-     addData('subscribe', {
+    if (this.data.settingMode === 'add') {
+      addData('subscribe', {
         startTime: this.data.startTime,
         startTimestamp: this.data.startTimestamp,
         endTime: this.data.endTime,
         endTimestamp: this.data.endTimestamp,
         timeQuantum: this.data.timeQuantum
-      }).then((r)=>{
+      }).then((r) => {
         wx.showToast({
           title: '打工人已启程',
         })
       })
-    }else{
-       upDateData('subscribe',this.data._id, {
+    } else {
+      upDateData('subscribe', this.data._id, {
         startTime: this.data.startTime,
         startTimestamp: this.data.startTimestamp,
         endTime: this.data.endTime,
         endTimestamp: this.data.endTimestamp,
         timeQuantum: this.data.timeQuantum
-      }).then((r)=>{
+      }).then((r) => {
         wx.showToast({
           title: '打工人已启程',
         })
       })
     }
   },
-  setDayDateInfo(){ //为每一天设置日期信息和时间戳信息
+  setDayDateInfo() { //为每一天设置日期信息和时间戳信息
     let date = new Date(this.data.startTimestamp)
-    for(let i = 0;i<7;i++){
+    for (let i = 0; i < 7; i++) {
       let timestamp = date.getTime()
-      console.log(timestamp,date.getDate())
+      console.log(timestamp, date.getDate())
       this.data.timeQuantum[i].timestamp = timestamp;
       this.data.timeQuantum[i].date = parseTimestampToDate(timestamp)
       date.setMilliseconds(86400000) //日期加一
@@ -251,10 +252,10 @@ Page({
       eveningCapacity: 1,
     }
   },
-  ininLoadData() {//页面配置从数据库读取
+  ininLoadData() { //页面配置从数据库读取
     this.data.settingMode = 'modify'
     whereQuery('subscribe', {}).then(res => {
-      res = res[res.length -1];
+      res = res[res.length - 1];
       this.data.timeQuantum = res.timeQuantum
       this.data._id = res._id;
       this.setDayPlan()
@@ -272,9 +273,24 @@ Page({
     for (let i = 0; i < 7; i++) {
       this.data.timeQuantum[i] = this.getDayTemplate()
     }
+    this.initSubTime();
     this.setDayPlan() //设置当日配置信息
     this.setData({
       timeQuantum: this.data.timeQuantum
+    })
+  },
+  initSubTime() {
+    const {
+      previousDate,
+      previousTimestamp,
+      nextDate,
+      nextTimestamp
+    } = findNearMonday(new Date().getTime())
+    this.setData({
+      startTime: previousDate,
+      startTimestamp: previousTimestamp,
+      endTime: nextDate,
+      endTimestamp: nextTimestamp,
     })
   },
 

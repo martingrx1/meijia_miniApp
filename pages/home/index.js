@@ -69,7 +69,7 @@ Page({
     })
   },
   confirmSub() { //确认预约
-    this.data.subDay.capacity--;
+    this.data.subDay.capacity--; // 预约日数量减少
     let subInfo = {
       date: this.data.subDay.date,
       clock: this.data.subDay.dayPlan[this.data.selectTimeIndex].time,
@@ -82,7 +82,7 @@ Page({
       subDayIndex: this.data.dayIndex,
       order: this.data.subDay.customers.length //预约者顺序 便于后续删除
     })
-    this.data.subDay.dayPlan[this.data.selectTimeIndex].capacity--;
+    this.data.subDay.dayPlan[this.data.selectTimeIndex].capacity--; //预约时间段数量减少
     this.data.timeQuantum[this.data.dayIndex] = this.data.subDay;
     this.setData({
       timeQuantum: this.data.timeQuantum

@@ -14,7 +14,7 @@
         </view>
       </view>
       <view class="header-right">
-        <view class="date">2020年11月23日 {{item.clock}}</view>
+        <view class="date">{{item.date}} {{item.clock}}</view>
       </view>
     </view>
     <view class="card-content">
