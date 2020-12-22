@@ -13,7 +13,7 @@
   </view>
 
   <view class="section">
-    <button bindtap="chooseImage">选择图片</button>
+    <button bindtap="chooseImage" wx:if="{{tempImages <= 6}}">选择图片</button>
   </view>
 
   <view class="section">

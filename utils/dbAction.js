@@ -1,8 +1,8 @@
 const db = wx.cloud.database()
 
-export function whereQuery(collection, query = {}) {
+export function whereQuery(collection, query = {},field={},limit=20) {
   return new Promise((reslove, reject) => {
-    db.collection(collection).where(query).get({
+    db.collection(collection).where(query).field(field).limit(limit).get({
       success: res => {
         reslove(res.data)
       },
@@ -57,11 +57,5 @@ export function getDataCount(collection, query = {}) {
   })
 }
 
-export function fieldQueryData(collection, field = {}) {
-  return new Promise((reslove, reject) => {
-    db.collection(collection).field(field)
-      .get()
-      .then(reslove)
-      .catch(reject)
-  })
-}
+export const command = db.command
+

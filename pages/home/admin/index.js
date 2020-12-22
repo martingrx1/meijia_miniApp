@@ -4,22 +4,27 @@ import {
   addData,
   upDateData,
   getDataCount,
-  fieldQueryData
+  coomand,
+  command
 } from '../../../utils/dbAction'
+import {
+  parseDateToTimestamp,
+  findNearMonday
+} from '../../../utils/date'
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    formattedData:[],
-    originData:[
+    formattedData: [],
+    originData: [
 
     ],
-    timeQuantum:[
+    timeQuantum: [
 
     ],
-    subInfo:[
+    subInfo: [
 
     ]
 
@@ -27,46 +32,45 @@ Page({
 
 
 
-  formatDate(dates){
-    let origin = []
-    let formatted = dates.map((v)=>{
-      return v.startTime + ' 至 ' +v.endTime
+  formatDate(dates) {
+    let formatted = dates.map((v) => {
+      return v.startTime + ' 至 ' + v.endTime
     })
     this.setData({
-      formattedData : formatted,
-      originData:dates
+      formattedData: formatted,
+      originData: dates
     })
   },
-  formatSubscribe(){
+  formatSubscribe() { //格式化预约信息
     let tQ = this.data.timeQuantum;
-    let formatted = tQ.map((v)=>{
-        return v.customers.map(c=>{
-          let subInfo = {};
-          subInfo.userInfo = {
-            _openid:c._openid,
-            avatarUrl : c.avatarUrl,
-            nickName:c.nickName
-          }
-          subInfo.clock = c.subInfo.clock;
-          subInfo.date = c.subInfo.date
-          return subInfo
-        })
+    let formatted = tQ.map((v) => {
+      return v.customers.map(c => {
+        let subInfo = {};
+        subInfo.userInfo = {
+          _openid: c._openid,
+          avatarUrl: c.avatarUrl,
+          nickName: c.nickName
+        }
+        subInfo.subTimeOut = parseDateToTimestamp(c.subInfo.date) + 86400000 < new Date().getTime() ? true : false
+        subInfo.clock = c.subInfo.clock;
+        subInfo.date = c.subInfo.date
+        return subInfo
+      })
     }).flat(Infinity)
     console.log(formatted)
     this.setData({
-      subInfo:formatted
+      subInfo: formatted
     })
   },
 
-  selectWeek(){
+  selectWeek() {
     wx.showActionSheet({
       itemList: this.data.formattedData,
-      itemColor: 'itemColor',
       success: (r) => {
-        whereQuery('subscribe',this.data.originData[r.tapIndex]).then((data)=>{
+        whereQuery('subscribe', this.data.originData[r.tapIndex]).then((data) => {
           console.log(data)
           this.setData({
-            timeQuantum:data[0].timeQuantum
+            timeQuantum: data[0].timeQuantum
           })
           this.formatSubscribe()
         })
@@ -78,14 +82,20 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    fieldQueryData('subscribe',{
-      _id:false,
-      startTime:true,
-      endTime:true
-    }).then(res=>{
-        this.formatDate(res.data)
-        console.log(res)
-      })
+    const {
+      previousTimestamp
+    } = findNearMonday(new Date().getTime())
+    whereQuery('subscribe', {
+      startTimestamp: command.gte(previousTimestamp)
+    }, {
+      _id: false,
+      startTime: true,
+      endTime: true
+    }, 6).then(res => {
+      console.log(res)
+      this.formatDate(res)
+     
+    })
   },
 
   /**

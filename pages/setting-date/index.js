@@ -93,7 +93,7 @@ Page({
     let stamp = status + 'Timestamp'
     let stampValue = parseDateToTimestamp(value)
 
-    if (!isMonday(value)) {
+    if (!isMonday(value)) { //星期一设置错误
       wx.showToast({
         title: '必须选择周一',
         icon: 'none'
@@ -101,6 +101,13 @@ Page({
       return;
     }
 
+    wx.showLoading({
+      title: `正在加载日期配置`,
+    })
+
+    this.selectQueryMethodsForStamp(stampValue)
+
+   
     if (status === 'end' && stampValue - this.data.startTimestamp > 86400000 * 7) {
       wx.showToast({
         title: '结束周设置错误',
@@ -115,6 +122,20 @@ Page({
     })
 
     console.log(this.data.startTimestamp, this.data.endTimestamp)
+  },
+
+  selectQueryMethodsForStamp(stampValue){
+    whereQuery('subscribe', {
+      startTimestamp: stampValue
+    }).then((res) => { //根据选择的起始周判断加载模式
+      // console.log(res,stampValue)
+      wx.hideLoading()
+      if (res.length > 0) { //新建周配置数据
+        this.ininLoadData(res[0])
+      } else {
+        this.initTemplateData(stampValue)
+      }
+    })
   },
   pickerDate(status, index) { //选择修改当日预约时间时
     let target = status + 'Index';
@@ -172,6 +193,9 @@ Page({
         wx.showToast({
           title: '打工人已启程',
         })
+        this.data.settingMode = 'modify'
+        this.data._id = r._id
+        // console.log(r)
       })
     } else {
       upDateData('subscribe', this.data._id, {
@@ -184,6 +208,7 @@ Page({
         wx.showToast({
           title: '打工人已启程',
         })
+        
       })
     }
   },
@@ -215,8 +240,6 @@ Page({
       afternoonCapacity: D.timeQuantum[i].afternoonCapacity,
       eveningCapacity: D.timeQuantum[i].eveningCapacity,
     })
-
-
   },
   setWeekPlan() { //将修改后的当日配置信息覆盖至周配置信息中
     let data = this.data;
@@ -252,40 +275,37 @@ Page({
       eveningCapacity: 1,
     }
   },
-  ininLoadData() { //页面配置从数据库读取
+  ininLoadData(data) { //页面配置从数据库读取
     this.data.settingMode = 'modify'
-    whereQuery('subscribe', {}).then(res => {
-      res = res[res.length - 1];
-      this.data.timeQuantum = res.timeQuantum
-      this.data._id = res._id;
-      this.setDayPlan()
-      this.setData({
-        startTime: res.startTime,
-        endTime: res.endTime,
-        startTimestamp: res.startTimestamp,
-        endTimestamp: res.endTimestamp
-      })
-
+    this.data.timeQuantum = data.timeQuantum
+    this.data._id = data._id;
+    this.setDayPlan()
+    this.setData({
+      startTime: data.startTime,
+      endTime: data.endTime,
+      startTimestamp: data.startTimestamp,
+      endTimestamp: data.endTimestamp
     })
+
   },
-  initTemplateData() { //页面配置为从本地模板新增
+  initTemplateData(startDateTimestamp = new Date().getTime()) { //页面配置为从本地模板新增
     this.data.settingMode = 'add'
     for (let i = 0; i < 7; i++) {
       this.data.timeQuantum[i] = this.getDayTemplate()
     }
-    this.initSubTime();
+    this.initSubTime(startDateTimestamp); //自动配置起始和结束周如期
     this.setDayPlan() //设置当日配置信息
     this.setData({
       timeQuantum: this.data.timeQuantum
     })
   },
-  initSubTime() {
+  initSubTime(startDateTimestamp) {
     const {
       previousDate,
       previousTimestamp,
       nextDate,
       nextTimestamp
-    } = findNearMonday(new Date().getTime())
+    } = findNearMonday(startDateTimestamp)
     this.setData({
       startTime: previousDate,
       startTimestamp: previousTimestamp,
@@ -298,17 +318,19 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    wx.showModal({
-      cancelText: '新建',
-      confirmText: '采用上周',
-      content: '当前配置模式',
-      showCancel: true,
-      title: '打工计划',
-      success: (result) => {
-        result.confirm ? this.ininLoadData() : this.initTemplateData()
-      },
+    this.initSubTime(new Date().getTime())
+    this.selectQueryMethodsForStamp(this.data.startTimestamp)
+    // wx.showModal({
+    //   cancelText: '新建',
+    //   confirmText: '采用上周',
+    //   content: '当前配置模式',
+    //   showCancel: true,
+    //   title: '打工计划',
+    //   success: (result) => {
+    //     result.confirm ? this.ininLoadData() : this.initTemplateData()
+    //   },
 
-    })
+    // })
   },
 
   /**

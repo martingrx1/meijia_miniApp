@@ -1,8 +1,16 @@
 <!--miniprogram/pages/show/index.wxml-->
 
 <view class="show-container" bindtap="preiviewImage">
+  <!-- <swiper class="swiper" indicator-dots="{{indicatorDots}}"
+        autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}" circular>
+        <block wx:for="{{swiperBackground}}" wx:key="*this">
+          <swiper-item>
+            <image class="image-full" mode="scaleToFill" src="{{item.url}}" ></image>
+          </swiper-item>
+        </block>
+      </swiper> -->
   <view class="show-item" wx:for="{{products}}" style="order:{{item.order || 1}}">
-    <image mode="widthFix" src="{{item.imgUrl}}" data-imgUrl="{{item.imgUrl}}" class="item-image" ></image>
+      <image wx:for="{{item.imgUrl}}" wx:for-item="path" mode="widthFix" src="{{path}}" data-imgUrl="{{path}}" class="item-image" ></image>
     <view class="item-intro">{{item.introText}} </view>
   </view>
 </view>

@@ -4,6 +4,8 @@ import {
   addData,
   upDateData
 } from '../../utils/dbAction'
+
+import {findNearMonday} from '../../utils/date'
 const db = wx.cloud.database()
 const app = getApp()
 Page({
@@ -12,21 +14,28 @@ Page({
    * 页面的初始数据
    */
   data: {
-    timeQuantum: [ //一周预约时间表数据
-
-    ],
-    subDay: {}, //选中的预约日信息
-    userInfo: {}, //当前用户信息
-    subInfo: {
-      date: null,
-      clock: null,
-      style: null,
-    },
-    goSettingNavPage: 10,
-    selectTimeIndex: -1, //预约入时间段状态
-    weekSubLimited: 1 //每周每人可预约上限
+    t: [],
+    lastCurrent: 0,
   },
 
+  defaultPageData() {
+    return{
+      subDay: {}, //选中的预约日信息
+      userInfo: {}, //当前用户信息
+      subInfo: {
+        date: null,
+        clock: null,
+        style: null,
+      },
+      dayIndex: -1, //选中的一周的哪一天
+      goSettingNavPage: 1,
+      selectTimeIndex: -1, //预约入时间段状态
+      weekSubLimited: 1 //每周每人可预约上限
+    }
+  },
+  initPageData(){
+    this.setData(this.defaultPageData())
+  },
 
 
   subDay(e) { //选择星期几
@@ -40,12 +49,12 @@ Page({
     let msg = e.detail.errMsg.split('getUserInfo:')[1];
     if (msg !== 'ok') {
 
-    } else if (this.data.selectTimeIndex === -1) {
+    } else if (this.data.selectTimeIndex === -1) { //用户信息存在,但未选择时间段
       wx.showToast({
         title: '请选择预约时间段',
         icon: 'none'
       })
-    } else {
+    } else { //用户信息存在,刷新用户信息
       this.refreshUserInfo(e.detail.userInfo)
     }
   },
@@ -77,13 +86,13 @@ Page({
     this.data.subDay.customers.push({ //预约者信息
       ...this.data.userInfo,
       subInfo,
-      _openid: this.data._openid,
-      subDayTimeIndex: this.data.selectTimeIndex,
-      subDayIndex: this.data.dayIndex,
+      _openid: this.data._openid, //预约用户id
+      subDayTimeIndex: this.data.selectTimeIndex, //预约时间段
+      subDayIndex: this.data.dayIndex, //预约日
       order: this.data.subDay.customers.length //预约者顺序 便于后续删除
     })
     this.data.subDay.dayPlan[this.data.selectTimeIndex].capacity--; //预约时间段数量减少
-    this.data.timeQuantum[this.data.dayIndex] = this.data.subDay;
+    this.data.timeQuantum[this.data.dayIndex] = this.data.subDay; //预约成功后刷新信息
     this.setData({
       timeQuantum: this.data.timeQuantum
     })
@@ -100,12 +109,13 @@ Page({
   },
 
   async init() {
+    this.initPageData() //页面数据初始化
     await this.queryData()
     this.getOpenid().then((r) => {
       wx.hideLoading()
       this.setData({
         _openid: r,
-        todayTimestamp:new Date().getTime()
+        todayTimestamp: new Date().getTime()
       })
       this.filter()
     })
@@ -114,25 +124,30 @@ Page({
   queryData() {
     return new Promise((reslove, reject) => {
       const _ = db.command;
-      let curTime = new Date().getTime()
+      const {previousTimestamp,previousDate} = findNearMonday(new Date().getTime())
+
+    console.log(previousTimestamp,previousDate)
       db.collection('subscribe').where({
-        startTimestamp: _.lt(curTime),
-        endTimestamp: _.gt(curTime)
-      }).get({
+        startTimestamp: _.gte(previousTimestamp)
+      }).limit(3).get({
         success: res => {
-          console.log(res, 'querydaya')
-          if (res.data.length > 0)
-            this.setData({
-              _id: res.data[0]._id,
-              startTime: res.data[0].startTime,
-              endTime: res.data[0].endTime,
-              timeQuantum: res.data[0].timeQuantum
-            })
+          res.data = res.data.map(t => {
+            return {
+              ...t,
+              ...this.defaultPageData()
+            }
+          })
+          this.setData({
+            t: res.data,
+            timeQuantum: res.data[0].timeQuantum,
+            _id: res.data[0]._id,
+            startTime: res.data[0].startTime,
+            endTime: res.data[0].endTime,
+          })
           reslove()
         }
       })
     })
-
   },
 
   getOpenid() { //获取openid
@@ -153,9 +168,8 @@ Page({
   filter() { //筛选,判断是否已达到本周预约上限
     this.data.weekSubLimited = 1;
     this.data.timeQuantum.forEach((day) => {
-      if (!day.capacity) day.contentText = '当日预约已满'
       day.customers.forEach((v) => {
-        console.log(this.data._openid, 'opendi')
+        console.log(this.data._openid, 'openid')
         if (v._openid === this.data._openid) {
           this.data.subUserInfo = v;
           this.data.weekSubLimited--;
@@ -186,9 +200,9 @@ Page({
   cancelSub() { //取消预约
     let sUI = this.data.subUserInfo;
     let tQ = this.data.timeQuantum;
-    tQ[sUI.subDayIndex].capacity++;
-    tQ[sUI.subDayIndex].customers.splice(sUI.order, 1);
-    tQ[sUI.subDayIndex].dayPlan[sUI.subDayTimeIndex].capacity++;
+    tQ[sUI.subDayIndex].capacity++; //预约日余量
+    tQ[sUI.subDayIndex].customers.splice(sUI.order, 1); //删除预约者
+    tQ[sUI.subDayIndex].dayPlan[sUI.subDayTimeIndex].capacity++; //预约时间段余量
 
     upDateData('subscribe', this.data._id, {
       timeQuantum: tQ
@@ -207,6 +221,30 @@ Page({
         url: '/pages/navigation/index',
       })
     }
+  },
+
+  swiperChange({
+    detail
+  }) {
+
+    for (const key in this.data) { //保存页面属性
+      if (/^(t|__webviewId__|_openid|lastCurrent)$/.test(key)) continue;
+      this.data.t[this.data.lastCurrent][key] = this.data[key]
+      // console.log(key, this.data[key])
+    }
+    this.data.lastCurrent = detail.current;
+
+    // this.initPageData()
+
+    for (const key in this.data) { //更新页面信息为下一页
+      if (/^(t|__webviewId__|_openid|lastCurrent)$/.test(key)) continue;
+      this.data[key] = this.data.t[detail.current][key]
+    }
+    this.setData(this.data)
+    this.filter()
+  },
+  switchWeek() {
+
   },
 
   /**
@@ -229,6 +267,7 @@ Page({
       title: '加载数据中',
     })
     this.init()
+
   },
 
   /**

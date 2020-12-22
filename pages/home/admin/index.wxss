@@ -3,10 +3,23 @@
   padding: 0 6px;
 }
 
+.card-list{
+  display: flex;
+  flex-direction: column;
+}
 .card {
+  flex: 1;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #fff;
+  background-color:#fff
+}
+
+.gray-transparent{
+  background-color: rgba(128, 128, 128, 0.432);
+}
+
+.flex-order-last{
+  order: 999;
 }
 
 .card-header{

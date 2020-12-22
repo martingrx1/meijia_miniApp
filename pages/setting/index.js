@@ -13,7 +13,7 @@ Page({
   data: {
     tempImages: [],
     introText: '',
-    order:0,
+    order: 0,
   },
 
   introInput({
@@ -34,8 +34,10 @@ Page({
 
   chooseImage() {
     wx.chooseImage({
-      count: 4,
+      count: 6,
       success: (result) => {
+        console.log(result);
+
         this.setData({
           tempImages: this.data.tempImages.concat(result.tempFilePaths)
         })
@@ -49,34 +51,55 @@ Page({
       tempImages: []
     })
   },
+  asyncUploadAll() {
+    return new Promise((reslove, reject) => {
+      let uploadIndex = this.data.tempImages.length - 1;
+      let tempImages = this.data.tempImages;
+      let uploadPath = []
+
+      function upload() {
+        if (uploadIndex < 0) {
+          reslove(uploadPath)
+        }
+        wx.cloud.uploadFile({
+          cloudPath: './products/' + new Date().getTime() + '.jpg',
+          filePath: tempImages[uploadIndex],
+          success: res => {
+            uploadPath.push(res.fileID)
+            uploadIndex--;
+            upload()
+          },
+          fail: reject
+        })
+      }
+      upload()
+    })
+  },
   uploadProduct() {
-    let tempImages = this.data.tempImages;
     wx.showModal({
       content: '确定上传了嘛~',
       title: '提醒',
       success: (result) => {
         if (result.confirm) {
-          wx.cloud.uploadFile({
-            cloudPath: './products/' + new Date().getTime() + '.jpg',
-            filePath: tempImages[tempImages.length - 1],
-            success: res => {
-              const _ = db.command;
-              upDateData('products', 'first', {
-                products: _.push({
-                    introText: this.data.introText,
-                    imgUrl: res.fileID,
-                    order:this.data.order
-                  }
-                )
-              }).then((res) => {
-                wx.showToast({
-                  title: '上传成功',
-                })
-                this.resetChoose();
-              }, err => {
-                console.log(err)
+          wx.showLoading({
+            title: '正在上传中',
+          })
+          this.asyncUploadAll().then(uploadPath => {
+            const _ = db.command;
+            upDateData('products', 'first', {
+              products: _.push({
+                introText: this.data.introText,
+                imgUrl: uploadPath,
+                order: this.data.order
               })
-            }
+            })
+          }).then(() => {
+            wx.showToast({
+              title: '上传成功',
+            })
+            this.resetChoose();
+          }).catch(err => {
+            console.log(err)
           })
         }
       },

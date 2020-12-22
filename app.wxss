@@ -1,3 +1,8 @@
 page{
   background-color: #CFAA9E;
 }
+
+
+.image-full{
+  width: 100%;
+}

@@ -18,7 +18,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-radius: 12px;
+  border-radius: 6px;
+  border: 2px solid rgb(221, 218, 218);
+  background-color: #fff;
   overflow: hidden;
   /* box-shadow: 0px 0px 4px ; */
 }
@@ -27,23 +29,23 @@
   display: flex;
   flex: 1;
   height: 80rpx;
-  border: 1px solid rgb(221, 218, 218);
+  border: 2px solid rgb(221, 218, 218);
+  border-bottom: none;
   text-align: center;
   line-height: 80rpx;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .sub-item:last-child {
-  border-bottom: none;
+  border: 2px solid rgb(221, 218, 218);
 }
-
 .sub-item-title {
   flex: 2;
   padding: 0 10px;
   font-size: 14px;
   color: gray;
   background-color: #fff;
-  border-right: 2px solid rgb(221, 218, 218);
+  border-right: 4px solid rgb(221, 218, 218);
 }
 
 .sub-item-content {
@@ -163,16 +165,25 @@
   background-color: #fff !important;
 }
 
-.sub-fuil {
-  background-color: rgb(202, 194, 194);
+.sub-full {
+  background-color: rgb(97, 93, 93);
 }
 
 .sub-success {
   background-color: #ED9282;
+
 }
 
 .sub-relex {
   background-color: rgba(172, 169, 169, 0.822);
+}
+
+
+.swiper{
+  width: 100%;
+  height: 600px;
+  margin-bottom: 10px;
+  /* background-color: #fff; */
 }
 
 
