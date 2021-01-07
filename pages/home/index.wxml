@@ -8,7 +8,7 @@
     <view>左右滑动可切换周数</view>
   </view>
 
-  <swiper class="swiper"  bindanimationfinish="swiperChange"   >
+  <swiper class="swiper"  bindanimationfinish="swiperChange" current="{{lastIndex}}" >
     <block wx:for="{{t.length}}" wx:key="*this">
       <swiper-item>
         <view class="sub-area">

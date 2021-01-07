@@ -137,12 +137,13 @@ Page({
               ...this.defaultPageData()
             }
           })
+          let index = this.data.lastCurrent; //修复因切换导致默认加载第一项预约日期导致的bug
           this.setData({
             t: res.data,
-            timeQuantum: res.data[0].timeQuantum,
-            _id: res.data[0]._id,
-            startTime: res.data[0].startTime,
-            endTime: res.data[0].endTime,
+            timeQuantum: res.data[index].timeQuantum,
+            _id: res.data[index]._id,
+            startTime: res.data[index].startTime,
+            endTime: res.data[index].endTime,
           })
           reslove()
         }
@@ -250,7 +251,9 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {},
+  onLoad: function (options) {
+   
+  },
 
   /**
    * 生命周期函数--监听页面初次渲染完成

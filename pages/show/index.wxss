@@ -27,7 +27,7 @@
   width: 100%;
 }
 .item-intro{
-  padding: 10px 8px;
+  padding: 8px 8px;
   text-align: center;
   font-size: 14px;
 }
