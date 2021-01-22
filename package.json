@@ -1,0 +1,22 @@
+{
+  "name": "meijia_miniapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martingrx1/meijia_miniApp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/martingrx1/meijia_miniApp/issues"
+  },
+  "homepage": "https://github.com/martingrx1/meijia_miniApp#readme",
+  "dependencies": {
+    "mini-luck-draw": "^0.0.7"
+  }
+}

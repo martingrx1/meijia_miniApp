@@ -1,13 +1,12 @@
 {
   "pages": [
+    "pages/luckDraw/index",
+
     "pages/home/index",
     "pages/setting-date/index",
     "pages/show/index",
-
     "pages/setting/index",
-   
     "pages/home/admin/index",
-
     "pages/navigation/index"
   ],
   "window": {
@@ -20,7 +19,8 @@
   "tabBar": {
     "color": "#fff",
     "backgroundColor": "#CFAA9E",
-    "list": [{
+    "list": [
+      {
         "pagePath": "pages/home/index",
         "iconPath": "images/tabbar/subscribe.png",
         "selectedIconPath": "images/tabbar/subscribe.png",
@@ -35,5 +35,6 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
+  "cloud": true,
   "style": "v2"
 }
