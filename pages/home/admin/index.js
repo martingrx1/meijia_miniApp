@@ -51,10 +51,13 @@ Page({
           avatarUrl: c.avatarUrl,
           nickName: c.nickName
         }
-        subInfo.subTimeOut = parseDateToTimestamp(c.subInfo.date) + 86400000 < new Date().getTime() ? true : false
-        subInfo.clock = c.subInfo.clock;
-        subInfo.date = c.subInfo.date
+        subInfo.subTimeOut = parseDateToTimestamp(c.subInfo.date) + 86400000 < new Date().getTime() ? true : false //预约过期
+        subInfo.orderStamp = parseDateToTimestamp(c.subInfo.date,c.subInfo.clock.split('-')[0])
+        subInfo.clock = c.subInfo.clock;  //预约时间段
+        subInfo.date = c.subInfo.date //预约日
         return subInfo
+      }).sort((a,b)=>{
+        return a.orderStamp - b.orderStamp
       })
     }).flat(Infinity)
     console.log(formatted)
@@ -68,7 +71,7 @@ Page({
       itemList: this.data.formattedData,
       success: (r) => {
         whereQuery('subscribe', this.data.originData[r.tapIndex]).then((data) => {
-          console.log(data)
+          console.log(data,'ttttt')
           this.setData({
             timeQuantum: data[0].timeQuantum
           })

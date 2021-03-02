@@ -38,8 +38,7 @@
               </button>
             </block>
           </view>
-          <button class="sub-confirm heartbeat" wx:if="{{weekSubLimited}}" open-type="getUserInfo"
-            bindgetuserinfo="checkUserLogin">
+          <button class="sub-confirm heartbeat" wx:if="{{weekSubLimited}}" open-type="getUserInfo" bindgetuserinfo="checkUserLogin" bindtap="subscribeAppMsg">
             预约
           </button>
           <block wx:else>

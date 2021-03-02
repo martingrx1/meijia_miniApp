@@ -1,8 +1,9 @@
 {
   "pages": [
+    "pages/home/index",
     "pages/luckDraw/index",
 
-    "pages/home/index",
+    
     "pages/setting-date/index",
     "pages/show/index",
     "pages/setting/index",

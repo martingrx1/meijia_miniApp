@@ -5,7 +5,14 @@ import {
   upDateData
 } from '../../utils/dbAction'
 
-import {findNearMonday} from '../../utils/date'
+import {
+  findNearMonday
+} from '../../utils/date'
+import {
+  subscribeAppMsg,
+  sendSubscribeMsg
+} from '../../utils/subscribeMsg'
+import APPCONF from '../../env/appInfo'
 const db = wx.cloud.database()
 const app = getApp()
 Page({
@@ -19,7 +26,7 @@ Page({
   },
 
   defaultPageData() {
-    return{
+    return {
       subDay: {}, //选中的预约日信息
       userInfo: {}, //当前用户信息
       subInfo: {
@@ -33,7 +40,7 @@ Page({
       weekSubLimited: 1 //每周每人可预约上限
     }
   },
-  initPageData(){
+  initPageData() {
     this.setData(this.defaultPageData())
   },
 
@@ -46,10 +53,9 @@ Page({
   },
   checkUserLogin(e) { //点击预约前需要保证是在登录状态
     // console.log(e)
-    let msg = e.detail.errMsg.split('getUserInfo:')[1];
-    if (msg !== 'ok') {
 
-    } else if (this.data.selectTimeIndex === -1) { //用户信息存在,但未选择时间段
+    let msg = e.detail.errMsg.split('getUserInfo:')[1];
+    if (msg !== 'ok') {} else if (this.data.selectTimeIndex === -1) { //用户信息存在,但未选择时间段
       wx.showToast({
         title: '请选择预约时间段',
         icon: 'none'
@@ -98,6 +104,19 @@ Page({
     })
     upDateData('subscribe', this.data._id, {
       timeQuantum: this.data.timeQuantum
+    }).then(() => {
+      sendSubscribeMsg({ //发送订阅
+        template_id: 'BRZ3zBklNX9_agABhLSYpCCO48JhaVqPCFQpb8WXzws',
+        touser: app.globalData._openid,
+        content: [
+          this.data.userInfo.nickName,
+          subInfo.date,
+          subInfo.clock.replace(/-/, '~'),
+          '联系QQ:',
+          '顾客自选美甲',
+          ' '
+        ]
+      })
     })
     this.filter()
   },
@@ -124,9 +143,12 @@ Page({
   queryData() {
     return new Promise((reslove, reject) => {
       const _ = db.command;
-      const {previousTimestamp,previousDate} = findNearMonday(new Date().getTime())
+      const {
+        previousTimestamp,
+        previousDate
+      } = findNearMonday(new Date().getTime())
 
-    console.log(previousTimestamp,previousDate)
+      console.log(previousTimestamp, previousDate)
       db.collection('subscribe').where({
         startTimestamp: _.gte(previousTimestamp)
       }).limit(3).get({
@@ -182,6 +204,9 @@ Page({
       timeQuantum: this.data.timeQuantum,
       weekSubLimited: this.data.weekSubLimited
     })
+  },
+  subscribeAppMsg() { //询问是否同意发送预约消息
+    subscribeAppMsg(APPCONF.TEMPLATES)
   },
 
   showCancelModal() {
@@ -252,7 +277,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-   
+
   },
 
   /**
