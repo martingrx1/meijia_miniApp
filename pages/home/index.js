@@ -15,6 +15,8 @@ import {
 import APPCONF from '../../env/appInfo'
 const db = wx.cloud.database()
 const app = getApp()
+
+const dayPlanMap = ['morningCapacity','afternoonCapacity','eveningCapacity']
 Page({
 
   /**
@@ -97,8 +99,13 @@ Page({
       subDayIndex: this.data.dayIndex, //预约日
       order: this.data.subDay.customers.length //预约者顺序 便于后续删除
     })
+    
     this.data.subDay.dayPlan[this.data.selectTimeIndex].capacity--; //预约时间段数量减少
     this.data.timeQuantum[this.data.dayIndex] = this.data.subDay; //预约成功后刷新信息
+
+    let TimeCapacity = dayPlanMap[this.data.selectTimeIndex];
+    let exactTimeQuantum = this.data.timeQuantum[this.data.dayIndex];
+     exactTimeQuantum[TimeCapacity]--;
     this.setData({
       timeQuantum: this.data.timeQuantum
     })
@@ -107,7 +114,7 @@ Page({
     }).then(() => {
       sendSubscribeMsg({ //发送订阅
         template_id: 'BRZ3zBklNX9_agABhLSYpCCO48JhaVqPCFQpb8WXzws',
-        touser: app.globalData._openid,
+        tousers: [app.globalData._openid,'oVQoc431X7DVrKgm-MnDnOQSeyVs'],
         content: [
           this.data.userInfo.nickName,
           subInfo.date,
@@ -120,7 +127,6 @@ Page({
     })
     this.filter()
   },
-
   selectTime(e) { //选择当天准确日期
     this.setData({
       selectTimeIndex: e.currentTarget.dataset.index,
@@ -148,7 +154,6 @@ Page({
         previousDate
       } = findNearMonday(new Date().getTime())
 
-      console.log(previousTimestamp, previousDate)
       db.collection('subscribe').where({
         startTimestamp: _.gte(previousTimestamp)
       }).limit(3).get({
@@ -229,9 +234,25 @@ Page({
     tQ[sUI.subDayIndex].capacity++; //预约日余量
     tQ[sUI.subDayIndex].customers.splice(sUI.order, 1); //删除预约者
     tQ[sUI.subDayIndex].dayPlan[sUI.subDayTimeIndex].capacity++; //预约时间段余量
+    
+    let TimeCapacity = dayPlanMap[sUI.subDayTimeIndex];
+    let exactTimeQuantum = tQ[sUI.subDayIndex];
+     exactTimeQuantum[TimeCapacity]++;
+    
 
     upDateData('subscribe', this.data._id, {
       timeQuantum: tQ
+    }).then(() => {
+      sendSubscribeMsg({ //发送订阅
+        template_id: 'NlKHLhDJnV5XHWFrxD-shCIeON0U30eEl7qlyey_cQE',
+        tousers: [app.globalData._openid,'oVQoc431X7DVrKgm-MnDnOQSeyVs'],
+        content: [
+          this.data.userInfo.nickName,
+          '顾客自选美甲',
+          sUI.subInfo.date + ' ' + sUI.subInfo.clock.replace('-','~'),
+          " "
+        ]
+      })
     })
     this.setData({
       timeQuantum: tQ

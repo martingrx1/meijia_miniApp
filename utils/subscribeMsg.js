@@ -3,7 +3,8 @@ import APPINFO from '../env/appInfo'
 
 
 const subscribeMsgTypeMap = {
-  'BRZ3zBklNX9_agABhLSYpCCO48JhaVqPCFQpb8WXzws': ['name7', 'date2', 'time23', 'thing3', 'thing11', 'thing4']
+  'BRZ3zBklNX9_agABhLSYpCCO48JhaVqPCFQpb8WXzws': ['name7', 'date2', 'time23', 'thing3', 'thing11', 'thing4'],
+  'NlKHLhDJnV5XHWFrxD-shCIeON0U30eEl7qlyey_cQE':['thing10','thing6','date2','thing4']
 
 }
 
@@ -40,23 +41,31 @@ function getAccessToken() {
   })
 }
 
+function sendSubscribeRequest(access_token,subscribeConf,touser){
+  wx.request({
+    method: 'POST',
+    url: APICONF.SEND_SUBSCRIBEMSG_API + `access_token=${access_token}`,
+    data: {
+      page: subscribeConf.page || 'index',
+      template_id: subscribeConf.template_id,
+      touser: touser,
+      data:createSubscribeMsgContent(subscribeConf.content,subscribeConf.template_id)  
+    },
+    success:console.log,
+    fail: err => {
+      throw new Error(err)
+    }
+  })
+}
+
 
 async function sendSubscribeMsg(subscribeConf) {
   try {
     let access_token = await getAccessToken();
-    wx.request({
-      method: 'POST',
-      url: APICONF.SEND_SUBSCRIBEMSG_API + `access_token=${access_token}`,
-      data: {
-        page: subscribeConf.page || 'index',
-        template_id: subscribeConf.template_id,
-        touser: subscribeConf.touser,
-        data:createSubscribeMsgContent(subscribeConf.content,subscribeConf.template_id)  
-      },
-      fail: err => {
-        throw new Error(err)
-      }
+    subscribeConf.tousers.map(user=>{
+      sendSubscribeRequest(access_token,subscribeConf,user)
     })
+
   } catch (err) {
     console.log(err);
   }
