@@ -3,4 +3,4 @@ env/appInfo.js
 
 
 project.config.json
-app.js
+env/

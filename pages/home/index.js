@@ -29,6 +29,7 @@ Page({
 
   defaultPageData() {
     return {
+      subUserInfo:null,
       subDay: {}, //选中的预约日信息
       userInfo: {}, //当前用户信息
       subInfo: {

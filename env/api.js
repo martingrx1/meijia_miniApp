@@ -1,13 +1,3 @@
-import {
-  ENV
-} from './index'
-
-
-const QQ_CONF = {
-  ACCESS_TOKEN_API :`https://api.q.qq.com/api/getToken?grant_type=client_credential&`,
-  END_SUBSCRIBEMSG_API : `https://api.q.qq.com/api/json/subscribe/SendSubscriptionMessage?`
-}
-
 
 const WX_CONF = {
   ACCESS_TOKEN_API : `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&`,
@@ -16,6 +6,4 @@ const WX_CONF = {
 }
 
 
-
-
-export default ENV === 'WX' ? WX_CONF : QQ_CONF;
+export default  WX_CONF 
